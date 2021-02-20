@@ -1,0 +1,115 @@
+<html>
+<head>
+<style>
+#canvas {
+  width: 800px;
+  height: 600px;
+}
+
+</style>
+</head>
+<body>
+<canvas id="canvas" width=800 height=600></canvas>
+
+<script>
+var canvas = document.querySelector('#canvas').getContext('2d');
+
+    x = 400,
+    y = 400;
+  const size = 20;
+function place_hexagon(x, y, color)
+{
+
+  canvas.beginPath();
+
+  canvas.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+
+  for (let side = 0; side < 7; side++) {
+     canvas.lineTo(x + size * Math.cos(side * 2 * Math.PI / 6), y + size * Math.sin(side * 2 * Math.PI / 6));
+    
+  }
+  canvas.fillStyle = color;
+  canvas.fill();
+  canvas.closePath();
+}
+
+function SE(x,y)
+{
+    return [x + 30, y + 17.5];
+}
+
+function N(x,y)
+{
+  return [x, y-35];
+}
+
+function NE(x,y)
+{
+  return [x + 30, y - 17.5];
+}
+
+function NW(x,y)
+{
+  return [x - 30, y - 17.5];
+}
+
+function SW(x,y)
+{
+    return [x - 30, y + 17.5];
+}
+function S(x,y)
+{
+  return [x, y+35];
+}
+
+let placed = {};
+
+let root_tile = null;
+let last_tile = null;
+
+for (let i = 0; i < 40; ++i)
+{
+  let r = new Uint8Array(1);
+  window.crypto.getRandomValues(r);
+  r = r[0];
+  
+  let c = ["red", "green", "blue", "purple", "orange", "pink"];
+
+  let f = [N,NE,SE,S,SW,NW];
+  let oldx = x;
+  let oldy = y;
+  [x,y] = f[r%6](x,y);
+
+  let location = ((x >> 1) << 16) + (y >> 1);
+  if (placed[location])
+  {
+      x = oldx;
+      y = oldy;
+      continue;
+  }
+  
+  place_hexagon(x,y, c[r%6]);
+  placed[location] = true;
+
+   
+  let new_tile = {
+    color: c[r%6],
+    neighbours: {}
+  };
+  
+  if (root_tile == null)
+    root_tile = new_tile;    
+
+  if (last_tile == null)
+    last_tile = root_tile;
+  else
+  {
+    last_tile.neighbours[r%6] = new_tile;
+    last_tile = new_tile;
+  }
+}
+
+console.log(root_tile);
+
+</script>
+</body>
